@@ -29,3 +29,12 @@ git clone https://github.com/timeopochin/ilo-nanpa
 cd ilo-nanpa
 python3 ilo-nanpa.py
 ```
+
+=== Usage
+
+* `h` and `l` to move left and right respectively
+* `q` to quit
+* `[0-9]` to insert a number
+* `[+-*/^]` to insert an operator
+* `<space>` or `<return>` to add a new empty item to the stack
+* `<backspace>` to delete

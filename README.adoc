@@ -1,0 +1,31 @@
+== ilo nanpa
+
+A visual interactive calculator for the terminal
+
+_This project is a proof of concept and has many basic features missing_
+
+image::rpn.gif[Screen Capture]
+
+=== Dependencies
+
+```
+python3
+ - termios
+ - tty
+ - os
+ - sys
+
+stty
+```
+
+A terminal that supports ANSI and Unicode.
+
+=== Running
+
+Clone the repository, go into the folder and run ilo-nanpa.py
+
+```
+git clone https://github.com/timeopochin/ilo-nanpa
+cd ilo-nanpa
+python3 ilo-nanpa.py
+```

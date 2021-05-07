@@ -100,6 +100,9 @@ class Mul(Add):
         elif type(a) == Num and type(b) == Div:
             return Div(Mul(b.a, a).evaluated, b.b).evaluated
 
+        elif type(a) == Div and type(b) == Div:
+            return Div(Mul(a.a, b.a).evaluated, Mul(a.b, b.b).evaluated).evaluated
+
         #else:
             #print(f'Need to implement {type(a)} {type(b)} for {type(self)}')
             #print()
@@ -125,6 +128,9 @@ class Div(Operator):
 
         elif type(a) == Num and type(b) == Div:
             return Div(Mul(a, b.b).evaluated, b.a).evaluated
+
+        elif type(a) == Div and type(b) == Div:
+            return Div(Mul(a.a, b.b).evaluated, Mul(a.b, b.a).evaluated).evaluated
 
         #else:
             #print(f'Need to implement {type(a)} {type(b)} for {type(self)}')

@@ -1,124 +1,73 @@
-class Num:
-    def __init__(self, val):
-        self.hasVal = True
-        if type(val) != str:
-            self.val = val
-        elif val not in '_':
-            if '.' in val:
-                self.val = float(val)
-            else:
-                self.val = int(val)
-        else:
-            self.val = 0
-            self.hasVal = False
-        self.highlight = False
+from sym import *
 
-    def __repr__(self):
-        return f'Num({self.val})'
+# Add brackets to an expression
+def brackets(exprH, exprPretty):
+    if exprH == 1:
+        return ['(' + exprPretty[0] + ')']
+    else:
+        withBrackets = []
+        withBrackets.append('⎛' + exprPretty[0] + '⎞')
+        for i in range(1, exprH - 1):
+            withBrackets.append('⎜' + exprPretty[i] + '⎟')
+        withBrackets.append('⎝' + exprPretty[-1] + '⎠')
+        return withBrackets
 
-    @property
-    def evaluated(self):
-        #print('\n'.join(self.prettiest[3]))
-        #print('---------------------------')
-        return self
+# Render expression with unicode
+def pretty(expr):
+    exprType = type(expr)
 
-    @property
-    def prettiest(self):
-        if self.hasVal:
-            val = str(self.val)
+    # Base case (Number)
+    if exprType == Num:
+        if expr.hasVal:
+            val = str(expr.val)
         else:
             val = ' '
         w = len(val)
-        if self.highlight:
+        if expr.highlight:
             val = '\x1b[7m' + val + '\x1b[0m'
         return w, 1, 0, [val]
 
-class Operator:
-    def __init__(self, a, b):
-        if type(a) == int:
-            self.a = Num(a)
-        else:
-            self.a = a
-        if type(b) == int:
-            self.b = Num(b)
-        else:
-            self.b = b
-        self.highlight = False
-
-    def __repr__(self):
-        return f'{str(type(self))[15:18]}({self.a}, {self.b})'
-
-    @property
-    def prettiest(self):
-        aW, aH, aA, a = self.pretty
-        new = ['\x1b[7m' + i + '\x1b[0m' if self.highlight else i for i in a]
+    # Highlight expression if needed
+    if expr.highlight:
+        expr.highlight = False
+        aW, aH, aA, a = pretty(expr)
+        new = ['\x1b[7m' + i + '\x1b[0m' for i in a]
         return aW, aH, aA, new
 
-    @staticmethod
-    def brackets(a):
-        if len(a) == 1:
-            return ['(' + a[0] + ')']
-        else:
-            new = []
-            new.append('⎛' + a[0] + '⎞')
-            for i in range(1, len(a) - 1):
-                new.append('⎜' + a[i] + '⎟')
-            new.append('⎝' + a[-1] + '⎠')
-            return new
+    # Rendered expression
+    p = []
 
-class Add(Operator):
-    def __init__(self, a, b):
-        super(Add, self).__init__(a, b)
-        self.separator = ' + '
+    # Get the sub expressions
+    aW, aH, aA, a = pretty(expr.a)
+    bW, bH, bA, b = pretty(expr.b)
 
-    @property
-    def evaluated(self):
-        #print('\n'.join(self.prettiest[3]))
-        #print('---------------------------')
-        a = self.a.evaluated
-        b = self.b.evaluated
+    # Order for brackets in horizontal operators
+    order = [Mul, Sub, Add]
+    symbols = [' • ', ' - ', ' + ']
 
-        if type(a) == Num and type(b) == Num:
-            return Num(a.val + b.val).evaluated
+    # Horizontal concatenation
+    if exprType in order:
 
-        elif type(a) == Div and type(b) == Num:
-            return Div(Add(a.a, Mul(a.b, b.val).evaluated).evaluated, a.b).evaluated
+        # Set the symbol
+        separator = symbols[order.index(exprType)]
 
-        elif type(a) == Num and type(b) == Div:
-            return Div(Add(b.a, Mul(b.b, a.val).evaluated).evaluated, b.b).evaluated
-
-        elif type(a) == Div and type(b) == Div:
-            return Div(Add(Mul(a.a, b.b).evaluated, Mul(b.a, a.b).evaluated).evaluated, Mul(a.b, b.b).evaluated).evaluated
-
-        #else:
-            #print(f'Need to implement {type(a)} {type(b)} for {type(self)}')
-            #print()
-
-        return Add(a, b)
-
-    @property
-    def pretty(self):
-        p = []
-        aW, aH, aA, a = self.a.prettiest
-        bW, bH, bA, b = self.b.prettiest
-        maxH = max(aH, bH)
-        maxA = max(aA, bA)
-
-        order = [Mul, Sub, Add]
-
-        if type(self.a) in order:
-            if order.index(type(self.a)) > order.index(type(self)):
-                a = Operator.brackets(a)
+        # Add brackets if needed
+        if type(expr.a) in order:
+            if order.index(type(expr.a)) > order.index(type(expr)):
+                a = brackets(aH, a)
                 aW += 2
-
-        if type(self.b) in order:
-            if order.index(type(self.b)) > order.index(type(self)):
-                b = Operator.brackets(b)
+        if type(expr.b) in order:
+            if order.index(type(expr.b)) > order.index(type(expr)):
+                b = brackets(bH, b)
                 bW += 2
 
+        # Calculate the final size
+        maxH = max(aH, bH)
+        maxA = max(aA, bA)
         maxDrop = max(aH - aA, bH - bA)
         newH = maxA + maxDrop
 
+        # Make both sub expressions the same height
         while aH < newH:
             if aA < maxA:
                 a.insert(0, ' '*aW)
@@ -126,7 +75,6 @@ class Add(Operator):
             else:
                 a.append(' '*aW)
             aH += 1
-
         while bH < newH:
             if bA < maxA:
                 b.insert(0, ' '*bW)
@@ -135,126 +83,46 @@ class Add(Operator):
                 b.append(' '*bW)
             bH += 1
 
+        # Concatenate the sub expressions
         for i in range(newH):
             if i == maxA:
-                p.append(a[i] + self.separator + b[i])
+                p.append(a[i] + separator + b[i])
             else:
-                p.append(a[i] + '   ' + b[i])
-
+                p.append(a[i] + ' '*len(separator) + b[i])
         return aW + bW + 3, newH, maxA, p
 
-class Sub(Add):
-    def __init__(self, a, b):
-        super(Sub, self).__init__(a, b)
-        self.separator = ' - '
+    # Fraction
+    elif exprType == Div:
 
-class Mul(Add):
-    def __init__(self, a, b):
-        super(Mul, self).__init__(a, b)
-        self.separator = ' • '
-
-    @property
-    def evaluated(self):
-        #print('\n'.join(self.prettiest[3]))
-        #print('---------------------------')
-        a = self.a.evaluated
-        b = self.b.evaluated
-
-        if type(a) == Num and type(b) == Num:
-            return Num(a.val*b.val)
-
-        elif type(a) == Div and type(b) == Num:
-            return Div(Mul(a.a, b).evaluated, a.b).evaluated
-
-        elif type(a) == Num and type(b) == Div:
-            return Div(Mul(b.a, a).evaluated, b.b).evaluated
-
-        #else:
-            #print(f'Need to implement {type(a)} {type(b)} for {type(self)}')
-            #print()
-
-class Div(Operator):
-    @property
-    def evaluated(self):
-        #print('\n'.join(self.prettiest[3]))
-        #print('---------------------------')
-        a = self.a.evaluated
-        b = self.b.evaluated
-
-        if type(a) == Num and type(b) == Num:
-            if not a.val % b.val:
-                return Num(a.val//b.val)
-            hcf = highestCommonFactor(a.val, b.val)
-            newA = a.val//hcf
-            newB = b.val//hcf
-            return Div(newA, newB)
-
-        elif type(a) == Div and type(b) == Num:
-            return Div(a.a, Mul(a.b, b).evaluated).evaluated
-
-        elif type(a) == Num and type(b) == Div:
-            return Div(Mul(a, b.b).evaluated, b.a).evaluated
-
-        #else:
-            #print(f'Need to implement {type(a)} {type(b)} for {type(self)}')
-            #print()
-
-    @property
-    def pretty(self):
-        p = []
-        aW, aH, aA, a = self.a.prettiest
-        bW, bH, bA, b = self.b.prettiest
-
-        if type(self.a) == Div:
-            a = Operator.brackets(a)
+        # Add brackets if needed
+        if type(expr.a) == Div:
+            a = brackets(aH, a)
             aW += 2
-
-        if type(self.b) == Div:
-            b = Operator.brackets(b)
+        if type(expr.b) == Div:
+            b = brackets(bH, b)
             bW += 2
 
+        # Calculate horizontal offset
         maxW = max(aW, bW)
         aO = (maxW - aW)//2
         bO = (maxW - bW)//2
 
+        # Concatenate the sub expressions
         p += [' '*aO + i + ' '*(maxW - aW - aO) for i in a]
         p.append('─'*maxW)
         p += [' '*bO + i + ' '*(maxW - bW - bO) for i in b]
-
         return maxW, aH + bH + 1, aH, p
 
-class Pow(Operator):
-    @property
-    def pretty(self):
-        p = []
-        aW, aH, aA, a = self.a.prettiest
-        bW, bH, bA, b = self.b.prettiest
+    # Power
+    elif exprType == Pow:
 
-        if type(self.a) != Num:
-            a = Operator.brackets(a)
+        # Add brackets if needed
+        if type(expr.a) != Num:
+            a = brackets(aH, a)
             aW += 2
 
+        # Concatenate the sub expressions
         p += [' '*aW + i for i in b]
         p += [i + ' '*bW for i in a]
-
         return aW + bW, aH + bH, bH + aA, p
 
-def getExprs(inputStack, cursor, ops, opClasses):
-    exprs = []
-    for i in range(len(inputStack)):
-        if inputStack[i] in '_' or inputStack[i].isdigit() or '.' in inputStack[i]:
-            exprs.append(Num(inputStack[i]))
-        elif inputStack[i] in ops:
-            b = exprs.pop()
-            a = exprs[-1]
-            exprs[-1] = opClasses[ops.index(inputStack[i])](a, b)
-        if i == cursor:
-            exprs[-1].highlight = True
-    return exprs
-
-def highestCommonFactor(a, b):
-    hcf = 1
-    for i in range(1, min(a, b) + 1):
-        if a % i == 0 and b % i == 0:
-            hcf = i
-    return hcf

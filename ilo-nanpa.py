@@ -2,7 +2,8 @@ import os
 import sys
 import tty
 import termios
-from pretty import *
+from sym import *
+from pretty import pretty
 
 def write(msg):
     sys.stdout.write(msg.replace('\n', '\n\r'))
@@ -106,12 +107,12 @@ def process(inputStack, char, cursor):
                 inputStack[cursor[0]] = '_'
             else:
                 inputStack[cursor[0]] = inputStack[cursor[0]][:-1]
-        elif char == 'h' and not cleaned:
+        elif char in 'rh' and not cleaned:
 
             # Inputed left
             if cursor[0] > 0:
                 cursor[0] -= 1
-        elif char == 'l':
+        elif char in 'sl':
 
             # Inputde right
             if cursor[0] < len(inputStack) - 1:
@@ -154,9 +155,9 @@ def process(inputStack, char, cursor):
     exprs = getExprs(inputStack, cursor[0], OPERATORS, OPCLASSES)
     line = int(rows) - 1
     for exprTree in reversed(exprs):
-        exprW, exprH, exprA, expr = exprTree.prettiest
+        exprW, exprH, exprA, expr = pretty(exprTree)
         try:
-            evalW, evalH, evalA, eval = exprTree.evaluated.prettiest
+            evalW, evalH, evalA, eval = pretty(exprTree.evaluated)
             #print(evalW, evalH, evalA, eval)
             #raise
         except:

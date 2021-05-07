@@ -5,7 +5,8 @@ class Num:
             self.val = val
         elif val not in '_':
             if '.' in val:
-                self.val = float(val)
+                #self.val = float(val)
+                self.val = val
             else:
                 self.val = int(val)
         else:
@@ -20,6 +21,12 @@ class Num:
     def evaluated(self):
         #print('\n'.join(self.prettiest[3]))
         #print('---------------------------')
+        if type(self.val) == int:
+            return self
+        elif type(self.val) == str and '.' in self.val:
+            numerator = int(self.val.replace('.', ''))
+            denominator = 10**len(self.val.split('.')[1])
+            return Div(numerator, denominator).evaluated
         return self
 
 class Operator:
@@ -141,9 +148,8 @@ def getExprs(inputStack, cursor, ops, opClasses):
             exprs[-1].highlight = True
     return exprs
 
+# Calculate the highest common factor
 def highestCommonFactor(a, b):
-    hcf = 1
-    for i in range(1, min(a, b) + 1):
-        if a % i == 0 and b % i == 0:
-            hcf = i
-    return hcf
+    while(b):
+        a, b = b, a % b
+    return a

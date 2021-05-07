@@ -135,18 +135,28 @@ def process(inputStack, char, cursor):
     cursor[1] = len(inputStack[cursor[0]])
 
     clear()
-
-    # Print the input stack
+    
     rows, columns = os.popen('stty size', 'r').read().split()
     goto(1, int(rows))
-    for i in range(len(inputStack)):
-        display = inputStack[i]
+
+    # Print the input stack
+    rpn = []
+    counter = 1
+    for i in range(len(inputStack) - 1, -1, -1):
+        if inputStack[i].isdigit() or '.' in inputStack[i] or not inputStack[i]:
+            counter -= 1
+        elif inputStack[i] in OPERATORS:
+            counter += 1
+        rpn.insert(0, inputStack[i] if inputStack[i] else ' ')
         if i == cursor[0]:
-            if not display:
-                display = ' '
-            display = '\x1b[7m' + display + '\x1b[0m'
-        display += ' '
-        write(display)
+            rpn[0] = '\x1b[7m' + rpn[0] + '\x1b[0m'
+        if counter == 0:
+            counter = 1
+            if i > cursor[0]:
+                rpn.clear()
+            else:
+                break
+    write(' '.join(rpn))
 
     # Print separator
     writeAt(1, int(rows) - 1, '─'*int(columns))

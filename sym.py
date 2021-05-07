@@ -19,8 +19,6 @@ class Num:
 
     @property
     def evaluated(self):
-        #print('\n'.join(self.prettiest[3]))
-        #print('---------------------------')
         if type(self.val) == int:
             return self
         elif type(self.val) == str and '.' in self.val:
@@ -45,14 +43,8 @@ class Operator:
         return f'{str(type(self))[15:18]}({self.a}, {self.b})'
 
 class Add(Operator):
-    def __init__(self, a, b):
-        super(Add, self).__init__(a, b)
-        self.separator = ' + '
-
     @property
     def evaluated(self):
-        #print('\n'.join(self.prettiest[3]))
-        #print('---------------------------')
         a = self.a.evaluated
         b = self.b.evaluated
 
@@ -69,25 +61,34 @@ class Add(Operator):
             return Div(Add(Mul(a.a, b.b).evaluated, Mul(b.a, a.b).evaluated).evaluated, Mul(a.b, b.b).evaluated).evaluated
 
         #else:
-            #print(f'Need to implement {type(a)} {type(b)} for {type(self)}')
-            #print()
 
         return Add(a, b)
 
 class Sub(Add):
-    def __init__(self, a, b):
-        super(Sub, self).__init__(a, b)
-        self.separator = ' - '
-
-class Mul(Add):
-    def __init__(self, a, b):
-        super(Mul, self).__init__(a, b)
-        self.separator = ' • '
-
     @property
     def evaluated(self):
-        #print('\n'.join(self.prettiest[3]))
-        #print('---------------------------')
+        a = self.a.evaluated
+        b = self.b.evaluated
+
+        if type(a) == Num and type(b) == Num:
+            return Num(a.val - b.val).evaluated
+
+        elif type(a) == Div and type(b) == Num:
+            return Div(Sub(a.a, Mul(a.b, b.val).evaluated).evaluated, a.b).evaluated
+
+        elif type(a) == Num and type(b) == Div:
+            return Div(Sub(b.a, Mul(b.b, a.val).evaluated).evaluated, b.b).evaluated
+
+        elif type(a) == Div and type(b) == Div:
+            return Div(Sub(Mul(a.a, b.b).evaluated, Mul(b.a, a.b).evaluated).evaluated, Mul(a.b, b.b).evaluated).evaluated
+
+        #else:
+
+        return Add(a, b)
+
+class Mul(Add):
+    @property
+    def evaluated(self):
         a = self.a.evaluated
         b = self.b.evaluated
 
@@ -103,15 +104,12 @@ class Mul(Add):
         elif type(a) == Div and type(b) == Div:
             return Div(Mul(a.a, b.a).evaluated, Mul(a.b, b.b).evaluated).evaluated
 
-        #else:
-            #print(f'Need to implement {type(a)} {type(b)} for {type(self)}')
-            #print()
+        else:
+            return Mul(a, b)
 
 class Div(Operator):
     @property
     def evaluated(self):
-        #print('\n'.join(self.prettiest[3]))
-        #print('---------------------------')
         a = self.a.evaluated
         b = self.b.evaluated
 
@@ -133,13 +131,24 @@ class Div(Operator):
             return Div(Mul(a.a, b.b).evaluated, Mul(a.b, b.a).evaluated).evaluated
 
         #else:
-            #print(f'Need to implement {type(a)} {type(b)} for {type(self)}')
-            #print()
 
 class Pow(Operator):
     @property
     def evaluated(self):
-        return Pow(self.a.evaluated, self.b.evaluated)
+        a = self.a.evaluated
+        b = self.b.evaluated
+
+        if type(a) == Num and a.val == 1:
+            return Num(1)
+
+        if type(b) == Num and type(b.val) == int:
+            result = a
+            for i in range(b.val - 1):
+                result = Mul(result, a).evaluated
+            return result
+
+        else:
+            return Pow(a, b)
 
 def getExprs(inputStack, cursor, ops, opClasses):
     exprs = []

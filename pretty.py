@@ -89,7 +89,7 @@ def pretty(expr):
                 p.append(a[i] + separator + b[i])
             else:
                 p.append(a[i] + ' '*len(separator) + b[i])
-        return aW + bW + 3, newH, maxA, p
+        return aW + bW + len(separator), newH, maxA, p
 
     # Fraction
     elif exprType == Div:

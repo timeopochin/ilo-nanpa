@@ -22,6 +22,10 @@ def writeAt(x, y, msg):
 
 def process(inputStack, char, cursor):
 
+    # Link shortcuts
+    if char in SHORTCUTS:
+        char = SHORTCUTS[char]
+
     # Update the input stack
     if char.isdigit():
 
@@ -207,8 +211,11 @@ def process(inputStack, char, cursor):
         writeAt(1, line - exprH, '\n'.join(p))
         line -= maxH + 1
 
-OPERATORS = '+-*/^'
-OPCLASSES = [Add, Sub, Mul, Div, Pow]
+OPERATORS = '+-*/^√'
+OPCLASSES = [Add, Sub, Mul, Div, Pow, Root]
+SHORTCUTS = {
+    '\\': '√'
+}
 
 if __name__ == '__main__':
 

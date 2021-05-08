@@ -126,3 +126,48 @@ def pretty(expr):
         p += [i + ' '*bW for i in a]
         return aW + bW, aH + bH, bH + aA, p
 
+    # Surds
+    elif exprType == Root:
+        if type(expr.b) == Num and expr.b.val == 2:
+            if type(expr.a) == Num:
+                root = '√'
+                if expr.b.highlight:
+                    root = '\x1b[7m' + root + '\x1b[0m'
+                p = [root + a[0]]
+                return aW + 1, 1, 0, p
+
+            # Hide the 2
+            bW = 1
+            bH = 1
+            b = [' ']
+
+        # Calculate the new size
+        newW = bW + aW + aH
+        newH = 1 + max(aH, bH)
+
+        # Make both sub expressions the same height
+        while bH < newH - 1:
+            b.insert(0, ' '*(bW))
+            bH += 1
+        for i in range(newH - 2, newH - aH - 2, -1):
+            b[i] += ' '*(newH - 1 - i)
+            if i > newH - aH -1:
+                b[i] += '╱' + ' '*(aH - newH + i)
+        for i in range(newH - aH - 1):
+            b[i] += ' '*aH
+        b.append(' '*(bW - 1) + '╲╱' + ' '*(aH - 1))
+        bH += 1
+
+        a.insert(0, '_'*aW)
+        aH += 1
+        while aH < newH:
+            a.insert(0, ' '*aW)
+            aH += 1
+
+        # Concatenate the sub expressions
+        p = [b[i] + a[i] for i in range(newH)]
+        return newW, newH, newH - 1, p
+
+
+
+

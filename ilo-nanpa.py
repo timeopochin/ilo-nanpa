@@ -22,6 +22,10 @@ def writeAt(x, y, msg):
 
 def process(inputStack, char, cursor):
 
+    # Link shortcuts
+    if char in SHORTCUTS:
+        char = SHORTCUTS[char]
+
     # Update the input stack
     if char.isdigit():
 
@@ -166,15 +170,13 @@ def process(inputStack, char, cursor):
     line = int(rows) - 1
     for exprTree in reversed(exprs):
         exprW, exprH, exprA, expr = pretty(exprTree)
-        try:
-            evalW, evalH, evalA, eval = pretty(exprTree.evaluated)
-            #print(evalW, evalH, evalA, eval)
-            #raise
-        except:
-            evalW = 17
-            evalH = 1
-            evalA = 0
-            eval = ['\x1b[41mNot sovlable yet!\x1b[0m']
+        #try:
+        evalW, evalH, evalA, eval = pretty(exprTree.evaluated)
+        #except:
+            #evalW = 17
+            #evalH = 1
+            #evalA = 0
+            #eval = ['\x1b[41mNot sovlable yet!\x1b[0m']
 
         # Colour
         expr = ['\x1b[44m' + i.replace('\x1b[0m', '\x1b[0;44m') + '\x1b[0m' for i in expr]
@@ -213,8 +215,11 @@ def process(inputStack, char, cursor):
         writeAt(1, line - exprH, '\n'.join(p))
         line -= maxH + 1
 
-OPERATORS = '+-*/^'
-OPCLASSES = [Add, Sub, Mul, Div, Pow]
+OPERATORS = '+-*/^√'
+OPCLASSES = [Add, Sub, Mul, Div, Pow, Root]
+SHORTCUTS = {
+    '\\': '√'
+}
 
 if __name__ == '__main__':
 

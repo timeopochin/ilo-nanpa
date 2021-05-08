@@ -166,15 +166,9 @@ def process(inputStack, char, cursor):
     line = int(rows) - 1
     for exprTree in reversed(exprs):
         exprW, exprH, exprA, expr = pretty(exprTree)
-        try:
-            evalW, evalH, evalA, eval = pretty(exprTree.evaluated)
-            #print(evalW, evalH, evalA, eval)
-            #raise
-        except:
-            evalW = 17
-            evalH = 1
-            evalA = 0
-            eval = ['\x1b[41mNot sovlable yet!\x1b[0m']
+        exprTree = exprTree.evaluated
+        exprTree.nested = False
+        evalW, evalH, evalA, eval = pretty(exprTree.evaluated)
 
         # Colour
         expr = ['\x1b[44m' + i.replace('\x1b[0m', '\x1b[0;44m') + '\x1b[0m' for i in expr]

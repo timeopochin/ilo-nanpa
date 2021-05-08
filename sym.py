@@ -13,6 +13,7 @@ class Num:
             self.val = 0
             self.hasVal = False
         self.highlight = False
+        self.nested = True
 
     def __repr__(self):
         return f'Num({self.val})'
@@ -38,6 +39,7 @@ class Operator:
         else:
             self.b = b
         self.highlight = False
+        self.nested = True
 
     def __repr__(self):
         return f'{str(type(self))[15:18]}({self.a}, {self.b})'
@@ -60,8 +62,6 @@ class Add(Operator):
         elif type(a) == Div and type(b) == Div:
             return Div(Add(Mul(a.a, b.b).evaluated, Mul(b.a, a.b).evaluated).evaluated, Mul(a.b, b.b).evaluated).evaluated
 
-        #else:
-
         return Add(a, b)
 
 class Sub(Add):
@@ -82,9 +82,7 @@ class Sub(Add):
         elif type(a) == Div and type(b) == Div:
             return Div(Sub(Mul(a.a, b.b).evaluated, Mul(b.a, a.b).evaluated).evaluated, Mul(a.b, b.b).evaluated).evaluated
 
-        #else:
-
-        return Add(a, b)
+        return Sub(a, b)
 
 class Mul(Add):
     @property
@@ -104,8 +102,7 @@ class Mul(Add):
         elif type(a) == Div and type(b) == Div:
             return Div(Mul(a.a, b.a).evaluated, Mul(a.b, b.b).evaluated).evaluated
 
-        else:
-            return Mul(a, b)
+        return Mul(a, b)
 
 class Div(Operator):
     @property
@@ -119,6 +116,8 @@ class Div(Operator):
             hcf = highestCommonFactor(a.val, b.val)
             newA = a.val//hcf
             newB = b.val//hcf
+            if not self.nested and newA > newB:
+                return Add(Num(newA//newB), Div(newA % newB, newB))
             return Div(newA, newB)
 
         elif type(a) == Div and type(b) == Num:
@@ -130,7 +129,7 @@ class Div(Operator):
         elif type(a) == Div and type(b) == Div:
             return Div(Mul(a.a, b.b).evaluated, Mul(a.b, b.a).evaluated).evaluated
 
-        #else:
+        return Div(a, b)
 
 class Pow(Operator):
     @property
@@ -147,8 +146,7 @@ class Pow(Operator):
                 result = Mul(result, a).evaluated
             return result
 
-        else:
-            return Pow(a, b)
+        return Pow(a, b)
 
 def getExprs(inputStack, cursor, ops, opClasses):
     exprs = []

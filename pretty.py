@@ -51,15 +51,12 @@ def pretty(expr):
         # Set the symbol
         separator = symbols[order.index(exprType)]
 
-        # Add brackets if needed
-        if type(expr.a) in order:
-            if order.index(type(expr.a)) > order.index(type(expr)):
-                a = brackets(aH, a)
-                aW += 2
-        if type(expr.b) in order:
-            if order.index(type(expr.b)) > order.index(type(expr)):
-                b = brackets(bH, b)
-                bW += 2
+        if (exprType in [Mul, Sub] and type(expr.b) in [Add, Sub]) or (exprType == Add and type(expr.b) == Sub):
+            b = brackets(bH, b)
+            bW += 2
+        if exprType == Mul and type(expr.a) in [Add, Sub]:
+            a = brackets(aH, a)
+            aW += 2
 
         # Calculate the final size
         maxH = max(aH, bH)

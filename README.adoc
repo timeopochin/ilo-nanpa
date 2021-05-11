@@ -4,6 +4,10 @@ A visual interactive calculator for the terminal
 
 _This project is a proof of concept and has many basic features missing_
 
+This project will likely be abandoned in the future in favour of
+https://github.com/timeopochin/cilo.git[cilo],
+a C reimplementation of this idea.
+
 image::rpn.gif[Screen Capture]
 
 === Dependencies
